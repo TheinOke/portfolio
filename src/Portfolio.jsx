@@ -303,7 +303,10 @@ export default function Portfolio() {
 
   const [navOpen, setNavOpen] = useState(false);
 
-  const [doc, setDoc] = useState({ w: 0, h: 0 });
+  const [doc, setDoc] = useState(() => ({
+    w: typeof document !== "undefined" ? document.documentElement.clientWidth : 0,
+    h: 0,
+  }));
   const [pathD, setPathD] = useState("");
   const [slide, setSlide] = useState(0);
   const [proj, setProj] = useState(0);
