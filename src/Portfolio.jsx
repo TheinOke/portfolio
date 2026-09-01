@@ -19,16 +19,33 @@ const D_SLOW = 1200;   // ms — reveals
 const D_MED = 900;     // ms — slides, project copy
 const D_FAST = 600;    // ms — hovers
 
-const C = {
-  bg: "#F8F9FA",
-  s100: "#E9ECEF",
-  s200: "#DEE2E6",
-  s300: "#CED4DA",
-  s400: "#ADB5BD",
-  s500: "#6C757D",
-  s600: "#495057",
-  s700: "#343A40",
-  s800: "#212529",
+/* two palettes, same roles, opposite ends — s800 is always the highest-contrast ink,
+   bg always the page canvas, so most of the UI re-themes just by swapping this object. */
+const PALETTES = {
+  light: {
+    bg: "#F8F9FA",
+    s100: "#E9ECEF",
+    s200: "#DEE2E6",
+    s300: "#CED4DA",
+    s400: "#ADB5BD",
+    s500: "#6C757D",
+    s600: "#495057",
+    s700: "#343A40",
+    s800: "#212529",
+    card: "#FFFFFF",
+  },
+  dark: {
+    bg: "#121316",
+    s100: "#1C1E21",
+    s200: "#2B2E33",
+    s300: "#3A3E44",
+    s400: "#5A6068",
+    s500: "#8B929A",
+    s600: "#ADB4BB",
+    s700: "#D3D7DC",
+    s800: "#F1F3F5",
+    card: "#1B1D20",
+  },
 };
 
 /* Add `img: "https://…"` to any slide to use a real photo instead of the plain card.
@@ -219,6 +236,29 @@ function SplitWords({ text, className = "", style = {}, hold = false, delay = 0,
   );
 }
 
+/* Sun/moon glyph for the theme toggle — shows the mode a click switches to. */
+function ThemeIcon({ theme }) {
+  return theme === "dark" ? (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="5" fill="currentColor" />
+      <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <line x1="12" y1="1" x2="12" y2="3" />
+        <line x1="12" y1="21" x2="12" y2="23" />
+        <line x1="1" y1="12" x2="3" y2="12" />
+        <line x1="21" y1="12" x2="23" y2="12" />
+        <line x1="4.2" y1="4.2" x2="5.6" y2="5.6" />
+        <line x1="18.4" y1="18.4" x2="19.8" y2="19.8" />
+        <line x1="4.2" y1="19.8" x2="5.6" y2="18.4" />
+        <line x1="18.4" y1="5.6" x2="19.8" y2="4.2" />
+      </g>
+    </svg>
+  ) : (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" fill="currentColor" />
+    </svg>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 export default function Portfolio() {
   const pathRef = useRef(null);
@@ -243,6 +283,25 @@ export default function Portfolio() {
   const aboutRef = useRef(null);
   const projRef = useRef(null);
   const techRef = useRef(null);
+  const milestonesRef = useRef(null);
+  const contactRef = useRef(null);
+
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem("theme");
+      if (saved === "light" || saved === "dark") return saved;
+    } catch {}
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+  const C = PALETTES[theme];
+
+  useEffect(() => {
+    try { localStorage.setItem("theme", theme); } catch {}
+    document.documentElement.style.colorScheme = theme;
+    document.body.style.background = C.bg;
+  }, [theme, C.bg]);
+
+  const [navOpen, setNavOpen] = useState(false);
 
   const [doc, setDoc] = useState({ w: 0, h: 0 });
   const [pathD, setPathD] = useState("");
@@ -521,6 +580,20 @@ export default function Portfolio() {
     else window.scrollTo({ top: y, behavior: "smooth" });
   };
 
+  const scrollToRef = (ref) => {
+    if (!ref.current) return;
+    scrollToY(ref.current.getBoundingClientRect().top + window.scrollY);
+    setNavOpen(false);
+  };
+
+  const NAV_LINKS = [
+    { label: "About", ref: aboutRef },
+    { label: "Journey", ref: milestonesRef },
+    { label: "Projects", ref: projRef },
+    { label: "Stack", ref: techRef },
+    { label: "Contact", ref: contactRef },
+  ];
+
   /* eased roulette rotation */
   useEffect(() => {
     let raf = 0;
@@ -535,7 +608,7 @@ export default function Portfolio() {
   }, []);
 
   useEffect(() => {
-    const k = (e) => { if (e.key === "Escape") setOpenMs(null); };
+    const k = (e) => { if (e.key === "Escape") { setOpenMs(null); setNavOpen(false); } };
     window.addEventListener("keydown", k);
     return () => window.removeEventListener("keydown", k);
   }, []);
@@ -617,17 +690,77 @@ export default function Portfolio() {
         }
       `}</style>
 
+      {/* ---------------- nav ---------------- */}
+      <header className="fixed inset-x-0 top-0 z-40"
+        style={{
+          background: `${C.bg}E6`,
+          backdropFilter: "blur(10px)",
+          borderBottom: `1px solid ${C.s200}`,
+          transition: `background ${D_FAST}ms ${EASE}, border-color ${D_FAST}ms ${EASE}`,
+        }}>
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8 md:px-10">
+          <button onClick={() => scrollToY(0)} className="os-btn text-sm font-extrabold tracking-tight" style={{ color: C.s800 }}>
+            TPS
+          </button>
+
+          <nav className="hidden items-center gap-7 md:flex">
+            {NAV_LINKS.map((l) => (
+              <button key={l.label} onClick={() => scrollToRef(l.ref)}
+                className="os-btn text-sm font-semibold" style={{ color: C.s600, transition: `color ${D_FAST}ms ${EASE}` }}>
+                {l.label}
+              </button>
+            ))}
+            <button onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))} aria-label="Toggle color theme"
+              className="os-btn flex h-9 w-9 items-center justify-center rounded-full"
+              style={{ border: `1px solid ${C.s300}`, color: C.s700 }}>
+              <ThemeIcon theme={theme} />
+            </button>
+          </nav>
+
+          <div className="flex items-center gap-3 md:hidden">
+            <button onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))} aria-label="Toggle color theme"
+              className="os-btn flex h-9 w-9 items-center justify-center rounded-full"
+              style={{ border: `1px solid ${C.s300}`, color: C.s700 }}>
+              <ThemeIcon theme={theme} />
+            </button>
+            <button onClick={() => setNavOpen((v) => !v)} aria-label="Toggle menu" aria-expanded={navOpen}
+              className="os-btn flex h-9 w-9 items-center justify-center rounded-md"
+              style={{ border: `1px solid ${C.s300}`, color: C.s700 }}>
+              <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
+                <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" strokeWidth="2"
+                  style={{ transformOrigin: "9px 1px", transition: `transform ${D_FAST}ms ${EASE}`, transform: navOpen ? "translateY(6px) rotate(45deg)" : "none" }} />
+                <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" strokeWidth="2"
+                  style={{ transition: `opacity ${D_FAST}ms ${EASE}`, opacity: navOpen ? 0 : 1 }} />
+                <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" strokeWidth="2"
+                  style={{ transformOrigin: "9px 13px", transition: `transform ${D_FAST}ms ${EASE}`, transform: navOpen ? "translateY(-6px) rotate(-45deg)" : "none" }} />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-hidden md:hidden" style={{ maxHeight: navOpen ? 320 : 0, transition: `max-height ${D_MED}ms ${EASE}` }}>
+          <nav className="flex flex-col gap-1 px-5 pb-4 sm:px-8">
+            {NAV_LINKS.map((l) => (
+              <button key={l.label} onClick={() => scrollToRef(l.ref)}
+                className="os-btn rounded-md px-2 py-2.5 text-left text-sm font-semibold" style={{ color: C.s600 }}>
+                {l.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </header>
+
       {/* ---------------- loading ---------------- */}
       {loading && (
         <div className="fixed inset-0 flex flex-col items-center justify-center px-6"
           style={{ zIndex: 80, background: C.bg, opacity: fading ? 0 : 1, transition: `opacity ${D_MED}ms ${EASE}` }}>
           <svg viewBox="0 0 320 130" className="w-64 sm:w-80" aria-hidden="true">
             <path className="ld-base" d="M 8 70 L 78 70 L 128 18 L 176 116 L 214 62 L 312 62"
-              fill="none" stroke={PLANE_INK} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              fill="none" stroke={C.s800} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             <path className="ld-sweep" d="M 8 70 L 78 70 L 128 18 L 176 116 L 214 62 L 312 62"
-              fill="none" stroke={PLANE_INK} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              fill="none" stroke={C.s800} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <p className="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl" style={{ color: PLANE_INK }}>
+          <p className="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl" style={{ color: C.s800 }}>
             Loading
             <span className="ld-dot" style={{ animationDelay: "0ms" }}>.</span>
             <span className="ld-dot" style={{ animationDelay: "150ms" }}>.</span>
@@ -698,13 +831,14 @@ export default function Portfolio() {
               <div className="mt-12 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <a href={CV_URL} download="Thein_Oke_Paing_Soe_CV.pdf"
                   className="os-btn inline-block rounded-md px-7 py-3 text-sm font-semibold tracking-wide"
-                  style={{ background: C.s800, color: "#FFFFFF", transition: `background ${D_FAST}ms ${EASE}` }}
+                  style={{ background: C.s800, color: C.bg, transition: `background ${D_FAST}ms ${EASE}` }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = C.s700)}
                   onMouseLeave={(e) => (e.currentTarget.style.background = C.s800)}>
                   Download CV
                 </a>
                 <span ref={mStart} className="block h-0 w-0" />
-                <a href="#contact" className="text-sm font-semibold underline underline-offset-4" style={{ color: C.s600 }}>Get in touch</a>
+                <a href="#contact" onClick={(e) => { e.preventDefault(); scrollToRef(contactRef); }}
+                  className="text-sm font-semibold underline underline-offset-4" style={{ color: C.s600 }}>Get in touch</a>
               </div>
             </Reveal>
           </div>
@@ -795,7 +929,7 @@ export default function Portfolio() {
       </section>
 
       {/* ---------------- milestones ---------------- */}
-      <section className="relative z-10 mx-auto max-w-5xl px-5 py-28 sm:px-8 md:px-10 md:py-36">
+      <section ref={milestonesRef} className="relative z-10 mx-auto max-w-5xl px-5 py-28 sm:px-8 md:px-10 md:py-36">
         <Reveal><p className="os-eyebrow mb-3 text-center font-semibold" style={{ color: C.s500 }}>Milestones</p></Reveal>
         <h2 className="text-center text-2xl font-extrabold sm:text-4xl">
           <SplitWords text="The route so far" delay={100} stagger={90} />
@@ -825,7 +959,7 @@ export default function Portfolio() {
                   <button onClick={() => setOpenMs(i)}
                     className="ms-card os-btn rounded-xl px-5 py-5 text-left sm:px-6 sm:py-6"
                     style={{
-                      background: passed ? "#FFFFFF" : C.s100,
+                      background: passed ? C.card : C.s100,
                       border: `1px solid ${passed ? C.s700 : C.s200}`,
                       boxShadow: passed ? "0 12px 30px rgba(33,37,41,0.09)" : "none",
                       transform: passed ? "translateY(0)" : "translateY(8px)",
@@ -867,7 +1001,7 @@ export default function Portfolio() {
                         <g key={p.short}>
                           <path
                             d={`M 0 0 L ${r * Math.cos(a1)} ${r * Math.sin(a1)} A ${r} ${r} 0 0 1 ${r * Math.cos(a2)} ${r * Math.sin(a2)} Z`}
-                            fill={active ? C.s700 : "#FFFFFF"} stroke={active ? C.s700 : C.s400} strokeWidth="1.5"
+                            fill={active ? C.s700 : C.card} stroke={active ? C.s700 : C.s400} strokeWidth="1.5"
                             style={{ transition: `fill ${D_MED}ms ${EASE}, stroke ${D_MED}ms ${EASE}` }} />
                           <text x={tx} y={ty} transform={`rotate(${i * step}, ${tx}, ${ty})`}
                             textAnchor="middle" dominantBaseline="middle" fontSize="18" fontWeight="700"
@@ -895,7 +1029,7 @@ export default function Portfolio() {
               <div className="mt-8 flex items-center gap-3 sm:mt-12 sm:gap-4">
                 <button onClick={() => goProject(Math.max(0, proj - 1))} aria-label="Previous project"
                   className="os-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm"
-                  style={{ border: `1px solid ${C.s400}`, color: C.s700, background: "#FFFFFF" }}>◁</button>
+                  style={{ border: `1px solid ${C.s400}`, color: C.s700, background: C.card }}>◁</button>
                 <div className="flex items-center gap-2 sm:gap-3">
                   {PROJECTS.map((p, i) => (
                     <button key={p.short} onClick={() => goProject(i)} aria-label={`Go to ${p.name}`}
@@ -905,7 +1039,7 @@ export default function Portfolio() {
                 </div>
                 <button onClick={() => goProject(Math.min(PROJECTS.length - 1, proj + 1))} aria-label="Next project"
                   className="os-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm"
-                  style={{ border: `1px solid ${C.s400}`, color: C.s700, background: "#FFFFFF" }}>▷</button>
+                  style={{ border: `1px solid ${C.s400}`, color: C.s700, background: C.card }}>▷</button>
               </div>
             </div>
           </div>
@@ -923,7 +1057,7 @@ export default function Portfolio() {
           <div ref={techStripRef} className="flex w-max gap-3 px-5 sm:gap-4" style={{ willChange: "transform" }}>
             {TECH.concat(TECH).map((t, i) => (
               <span key={`${t.name}-${i}`} className="flex items-center gap-3 whitespace-nowrap rounded-md px-6 py-4 text-sm font-semibold sm:px-8 sm:py-5 sm:text-base"
-                style={{ background: "#FFFFFF", border: `1px solid ${C.s200}`, color: C.s700 }}>
+                style={{ background: C.card, border: `1px solid ${C.s200}`, color: C.s700 }}>
                 <img src={t.icon} alt="" aria-hidden="true" className="h-6 w-6 shrink-0 sm:h-7 sm:w-7" loading="lazy" />
                 {t.name}
               </span>
@@ -936,9 +1070,9 @@ export default function Portfolio() {
       </section>
 
       {/* ---------------- contact ---------------- */}
-      <section id="contact" className="relative z-10 mx-auto max-w-6xl px-5 pb-16 pt-20 sm:px-8 md:px-10 md:pb-20 md:pt-28">
+      <section id="contact" ref={contactRef} className="relative z-10 mx-auto max-w-6xl px-5 pb-16 pt-20 sm:px-8 md:px-10 md:pb-20 md:pt-28">
         <div className="grid gap-10 rounded-2xl p-6 sm:p-10 md:grid-cols-2 md:gap-16 md:p-14"
-          style={{ background: "#FFFFFF", border: `1px solid ${C.s200}` }}>
+          style={{ background: C.card, border: `1px solid ${C.s200}` }}>
           <div>
             <Reveal><p className="os-eyebrow mb-3 font-semibold" style={{ color: C.s500 }}>Contact me</p></Reveal>
             <h2 className="text-2xl font-extrabold sm:text-4xl">
@@ -972,7 +1106,7 @@ export default function Portfolio() {
               value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
             <button ref={sendRef} onClick={sendMail}
               className="os-btn w-full rounded-md px-8 py-3 text-sm font-semibold sm:w-auto sm:self-end"
-              style={{ background: C.s800, color: "#FFFFFF", transition: `background ${D_FAST}ms ${EASE}` }}
+              style={{ background: C.s800, color: C.bg, transition: `background ${D_FAST}ms ${EASE}` }}
               onMouseEnter={(e) => (e.currentTarget.style.background = C.s700)}
               onMouseLeave={(e) => (e.currentTarget.style.background = C.s800)}>
               Send message
@@ -987,7 +1121,7 @@ export default function Portfolio() {
         <div className="fixed inset-0 flex items-end justify-center px-4 py-6 sm:items-center sm:px-6"
           style={{ zIndex: 70, background: "rgba(33,37,41,0.55)" }} onClick={() => setOpenMs(null)} role="dialog" aria-modal="true">
           <div className="proj-in w-full max-w-lg rounded-2xl p-6 sm:p-8"
-            style={{ background: "#FFFFFF", border: `1px solid ${C.s200}`, boxShadow: "0 24px 60px rgba(33,37,41,0.3)" }}
+            style={{ background: C.card, border: `1px solid ${C.s200}`, boxShadow: "0 24px 60px rgba(33,37,41,0.3)" }}
             onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
@@ -1000,7 +1134,7 @@ export default function Portfolio() {
             <p className="mt-6 text-sm leading-loose sm:text-base" style={{ color: C.s600 }}>{MILESTONES[openMs].body}</p>
             <a href={MILESTONES[openMs].link} download
               className="os-btn mt-8 inline-block rounded-md px-6 py-3 text-sm font-semibold"
-              style={{ background: C.s800, color: "#FFFFFF" }}>
+              style={{ background: C.s800, color: C.bg }}>
               {MILESTONES[openMs].linkLabel}
             </a>
           </div>
