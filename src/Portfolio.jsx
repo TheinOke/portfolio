@@ -323,7 +323,7 @@ export default function Portfolio() {
   modalOpen.current = openMs !== null;
 
   const isSmall = doc.w > 0 && doc.w < 768;
-  const aboutH = 120 + SLIDES.length * 55;
+  const aboutH = isSmall ? 90 + SLIDES.length * 32 : 120 + SLIDES.length * 55;
   const projH = 110 + PROJECTS.length * 52;
 
   /* font */
@@ -528,11 +528,14 @@ export default function Portfolio() {
     let raf = 0;
     let idle = 0;
 
+    let selfScroll = false;
     const step = () => {
       const cur = window.scrollY;
       const d = target - cur;
-      if (Math.abs(d) < 0.5) { window.scrollTo(0, target); running = false; raf = 0; return; }
+      selfScroll = true;
+      if (Math.abs(d) < 0.5) { window.scrollTo(0, target); selfScroll = false; running = false; raf = 0; return; }
       window.scrollTo(0, cur + d * 0.075);
+      selfScroll = false;
       raf = requestAnimationFrame(step);
     };
     const start = () => { if (!running) { running = true; raf = requestAnimationFrame(step); } };
@@ -541,12 +544,19 @@ export default function Portfolio() {
     const settle = () => {
       if (modalOpen.current) return;
       const cur = window.scrollY;
-      let best = null, bestD = Infinity;
-      snapPoints().forEach((pt) => {
+      const pts = snapPoints().sort((a, b) => a - b);
+      let bestIdx = -1, bestD = Infinity;
+      pts.forEach((pt, i) => {
         const d = Math.abs(pt - cur);
-        if (d < bestD) { bestD = d; best = pt; }
+        if (d < bestD) { bestD = d; bestIdx = i; }
       });
-      if (best !== null && bestD > 2 && bestD < window.innerHeight * 0.34) glide.current(best);
+      if (bestIdx === -1) return;
+      const gaps = [];
+      if (bestIdx > 0) gaps.push(pts[bestIdx] - pts[bestIdx - 1]);
+      if (bestIdx < pts.length - 1) gaps.push(pts[bestIdx + 1] - pts[bestIdx]);
+      const minGap = gaps.length ? Math.min(...gaps) : Infinity;
+      const maxSnap = Math.min(window.innerHeight * 0.34, minGap * 0.4);
+      if (bestD > 2 && bestD < maxSnap) glide.current(pts[bestIdx]);
     };
     const scheduleSettle = () => { clearTimeout(idle); idle = setTimeout(settle, 220); };
 
@@ -559,7 +569,13 @@ export default function Portfolio() {
       scheduleSettle();
     };
     const onScroll = () => {
-      if (!running) target = window.scrollY;
+      // A scroll not caused by our own glide() animation is user-driven (touch,
+      // native wheel when coarse, scrollbar drag, keyboard) — it must always win,
+      // so cancel any in-progress snap instead of letting it fight the input.
+      if (!selfScroll) {
+        if (running) { running = false; if (raf) { cancelAnimationFrame(raf); raf = 0; } }
+        target = window.scrollY;
+      }
       if (coarse) scheduleSettle();
     };
 
