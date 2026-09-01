@@ -528,14 +528,11 @@ export default function Portfolio() {
     let raf = 0;
     let idle = 0;
 
-    let selfScroll = false;
     const step = () => {
       const cur = window.scrollY;
       const d = target - cur;
-      selfScroll = true;
-      if (Math.abs(d) < 0.5) { window.scrollTo(0, target); selfScroll = false; running = false; raf = 0; return; }
+      if (Math.abs(d) < 0.5) { window.scrollTo(0, target); running = false; raf = 0; return; }
       window.scrollTo(0, cur + d * 0.075);
-      selfScroll = false;
       raf = requestAnimationFrame(step);
     };
     const start = () => { if (!running) { running = true; raf = requestAnimationFrame(step); } };
@@ -569,22 +566,29 @@ export default function Portfolio() {
       scheduleSettle();
     };
     const onScroll = () => {
-      // A scroll not caused by our own glide() animation is user-driven (touch,
-      // native wheel when coarse, scrollbar drag, keyboard) — it must always win,
-      // so cancel any in-progress snap instead of letting it fight the input.
-      if (!selfScroll) {
-        if (running) { running = false; if (raf) { cancelAnimationFrame(raf); raf = 0; } }
-        target = window.scrollY;
-      }
+      if (!running) target = window.scrollY;
       if (coarse) scheduleSettle();
+    };
+    // A fresh touch, or a real wheel gesture on a coarse pointer (Chrome DevTools
+    // device emulation reports coarse but still forwards a real mouse wheel — we
+    // don't attach onWheel for coarse, so native scrolling runs unopposed), means
+    // the user is actively driving the page: cancel any in-progress snap so it
+    // can't fight them.
+    const cancelGlide = () => {
+      if (running) { running = false; if (raf) { cancelAnimationFrame(raf); raf = 0; } }
+      target = window.scrollY;
     };
 
     if (!reduce && !coarse) window.addEventListener("wheel", onWheel, { passive: false });
     if (!reduce) window.addEventListener("scroll", onScroll, { passive: true });
+    if (!reduce) window.addEventListener("touchstart", cancelGlide, { passive: true });
+    if (!reduce && coarse) window.addEventListener("wheel", cancelGlide, { passive: true });
 
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("touchstart", cancelGlide);
+      window.removeEventListener("wheel", cancelGlide);
       clearTimeout(idle);
       if (raf) cancelAnimationFrame(raf);
       glide.current = null;
