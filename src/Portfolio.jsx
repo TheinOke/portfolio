@@ -1,4 +1,11 @@
 import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from "react";
+import emailjs from "@emailjs/browser";
+
+/* Sign up at emailjs.com, add an email service + template, then fill these
+   from your dashboard (Account > General for the public key). */
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
 /* ------------------------------------------------------------------
    EDIT THESE FIRST
@@ -313,6 +320,7 @@ export default function Portfolio() {
   const [passedCount, setPassedCount] = useState(0);
   const [openMs, setOpenMs] = useState(null);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [sendState, setSendState] = useState("idle"); // idle | sending | sent | error
 
   const [loading, setLoading] = useState(true);
   const [fading, setFading] = useState(false);
@@ -644,10 +652,21 @@ export default function Portfolio() {
     scrollToY(top + span * ((i + 0.5) / PROJECTS.length));
   };
 
-  const sendMail = () => {
-    const subject = encodeURIComponent(`Portfolio message from ${form.name || "someone"}`);
-    const body = encodeURIComponent(`${form.message}\n\n— ${form.name}\n${form.email}`);
-    window.location.href = `mailto:theinokepaingsoe@gmail.com?subject=${subject}&body=${body}`;
+  const sendMail = async () => {
+    if (!form.name || !form.email || !form.message || sendState === "sending") return;
+    setSendState("sending");
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        { from_name: form.name, from_email: form.email, message: form.message },
+        { publicKey: EMAILJS_PUBLIC_KEY }
+      );
+      setSendState("sent");
+      setForm({ name: "", email: "", message: "" });
+    } catch {
+      setSendState("error");
+    }
   };
 
   const R = 200;
@@ -723,7 +742,7 @@ export default function Portfolio() {
         }}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8 md:px-10">
           <button onClick={() => scrollToY(0)} className="os-btn text-sm font-extrabold tracking-tight" style={{ color: C.s800 }}>
-            TPS
+            Thein Oke
           </button>
 
           <nav className="hidden items-center gap-7 md:flex">
@@ -1127,13 +1146,22 @@ export default function Portfolio() {
               value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             <textarea rows={5} className="os-in w-full resize-none rounded-md px-4 py-3 text-sm" style={input} placeholder="What are you working on?"
               value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
-            <button ref={sendRef} onClick={sendMail}
-              className="os-btn w-full rounded-md px-8 py-3 text-sm font-semibold sm:w-auto sm:self-end"
+            <button ref={sendRef} onClick={sendMail} disabled={sendState === "sending"}
+              className="os-btn w-full rounded-md px-8 py-3 text-sm font-semibold disabled:opacity-60 sm:w-auto sm:self-end"
               style={{ background: C.s800, color: C.bg, transition: `background ${D_FAST}ms ${EASE}` }}
               onMouseEnter={(e) => (e.currentTarget.style.background = C.s700)}
               onMouseLeave={(e) => (e.currentTarget.style.background = C.s800)}>
-              Send message
+              {sendState === "sending" ? "Sending…" : "Send message"}
             </button>
+            {sendState === "sent" && (
+              <p className="text-sm font-semibold" style={{ color: C.s600 }}>Thanks — your message is on its way.</p>
+            )}
+            {sendState === "error" && (
+              <p className="text-sm font-semibold" style={{ color: "#C0392B" }}>
+                Something went wrong — try again, or email me directly at{" "}
+                <a href="mailto:theinokepaingsoe@gmail.com" className="underline underline-offset-4">theinokepaingsoe@gmail.com</a>.
+              </p>
+            )}
           </Reveal>
         </div>
         <p className="mt-12 text-center text-xs" style={{ color: C.s400 }}>© {new Date().getFullYear()} Thein Oke Paing Soe</p>
