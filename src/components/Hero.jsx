@@ -1,6 +1,7 @@
 import React from "react";
 import Reveal from "./Reveal";
 import SplitWords from "./SplitWords";
+import SplitChars from "./SplitChars";
 import { CV_URL, PHOTO_URL, BLOB_D, BLOB_VIEW, EASE, D_MED, D_FAST } from "../data";
 
 export default function Hero({ C, loading, mStart, scrollToRef, contactRef }) {
@@ -14,7 +15,7 @@ export default function Hero({ C, loading, mStart, scrollToRef, contactRef }) {
           </Reveal>
 
           <h1 className="mt-6 text-3xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
-            <SplitWords text="Thein Oke Paing Soe" hold={loading} delay={250} stagger={110} />
+            <SplitChars text="Thein Oke Paing Soe" hold={loading} delay={250} stagger={28} />
           </h1>
 
           <p className="mt-3 text-base font-semibold sm:text-xl" style={{ color: C.s600 }}>

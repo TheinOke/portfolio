@@ -4,7 +4,7 @@ import { SLIDES, EASE, D_MED } from "../data";
 
 export default function About({ C, theme, aboutRef, aboutH, mAbout, mAboutB, slide }) {
   const labelFill = theme === "dark" ? "#FFFFFF" : "#000000";
-  const labelOutline = theme === "dark" ? "" : "#FFFFFF";
+  const labelOutline = theme === "dark" ? "FFFFFF" : "#FFFFFF";
   return (
     <section ref={aboutRef} className="relative z-20" style={{ height: `${aboutH}vh` }}>
       <span ref={mAbout} className="absolute block h-0 w-0" style={{ left: "12%", top: "9%" }} />

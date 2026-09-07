@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.6em) rotate(3deg);
+}
+.play .char {
+  animation: riseIn 0.7s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  animation-delay: calc(var(--char-delay, 0ms) + var(--i) * var(--char-stagger, 28ms));
+}
+@keyframes riseIn {
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}

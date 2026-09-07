@@ -53,7 +53,7 @@ export const PALETTES = {
    `title`/`body` drive the copy next to the slider, so each slide tells its own part of the story. */
 export const SLIDES = [
   {
-    label: "Singapore", note: "Where it started", img: "/slides/slide-1.jpg",
+    label: "", note: "Where it started", img: "/slides/slide-1.jpg",
     title: "Six years of learning, one habit",
     body: [
       "I started with certifications rather than a straight line — NCC diplomas, then ITPEC — because each one forced me to learn a fundamental properly instead of skipping ahead to the framework.",
@@ -61,7 +61,7 @@ export const SLIDES = [
     ],
   },
   {
-    label: "First line of code", note: "NCC Level 4", img: "/slides/slide-2.jpg",
+    label: "", note: "NCC Level 4", img: "/slides/slide-2.jpg",
     title: "Where the fundamentals started",
     body: [
       "NCC Level 4 was my introduction to programming, databases and systems analysis — the first time I had to explain, not just use, how software actually works.",
@@ -69,7 +69,7 @@ export const SLIDES = [
     ],
   },
   {
-    label: "Exam season", note: "ITPEC IP & FE", img: "/slides/slide-3.jpg",
+    label: "", note: "", img: "/slides/slide-3.jpg",
     title: "Proving it under pressure",
     body: [
       "Passing the ITPEC Information Technology Passport and Fundamental IT Engineer exams meant sitting formal, timed assessments on algorithms, architecture and systems design — no shortcuts.",
@@ -85,7 +85,7 @@ export const SLIDES = [
     ],
   },
   {
-    label: "Frontiir", note: "Software Engineer", img: "",
+    label: "", note: "Software Engineer", img: "/slides/slide-5.jpeg",
     title: "Building it for real, at Frontiir",
     body: [
       "I build backend services, internal tooling and data pipelines for one of Myanmar's largest ISPs — systems where uptime and correctness aren't optional.",
@@ -95,11 +95,11 @@ export const SLIDES = [
 ];
 
 export const MILESTONES = [
-  { title: "Matriculation Exam passed", year: "2019", body: "Passed the national matriculation examination and moved straight into computing studies.", link: "#", linkLabel: "Download certificate" },
-  { title: "NCC Level 4 & Level 5 passed", year: "2022", body: "Completed NCC Education Level 4 and Level 5 Diplomas in Computing — programming, databases and systems analysis.", link: "#", linkLabel: "Download diploma" },
-  { title: "ITPEC IP & FE passed", year: "2023", body: "Passed the Information Technology Passport and Fundamental Information Technology Engineer examinations under ITPEC.", link: "#", linkLabel: "Download certificate" },
-  { title: "BSc in Computing — University of Greenwich", year: "2024 — present", body: "Reading for a BSc (Hons) in Computing, focused on distributed systems and backend engineering.", link: "#", linkLabel: "Download transcript" },
-  { title: "Software Engineer at Frontiir", year: "Mar 2025 — present", body: "Building backend services, internal tooling and data pipelines for one of Myanmar's largest ISPs.", link: "#", linkLabel: "Download resume" },
+  { title: "Matriculation Exam passed", year: "2019", body: "Passed the national matriculation examination and moved straight into computing studies.", link: "/certificates/Matriculation_Exam.jpg", linkLabel: "Download certificate" },
+  { title: "NCC Level 4 & Level 5 passed", year: "2022", body: "Completed NCC Education Level 4 and Level 5 Diplomas in Computing — programming, databases and systems analysis.", link: "/certificates/NCC.zip", linkLabel: "Download diploma" },
+  { title: "ITPEC IP & FE passed", year: "2023", body: "Passed the Information Technology Passport and Fundamental Information Technology Engineer examinations under ITPEC.", link: "/certificates/ITPEC.zip", linkLabel: "Download certificate" },
+  { title: "BSc in Computing — University of Greenwich", year: "2024 — present", body: "Reading for a BSc (Hons) in Computing, focused on distributed systems and backend engineering.", link: "#", linkLabel: "In Progress..." },
+  { title: "Software Engineer at Frontiir", year: "Mar 2025 — present", body: "Building backend services, internal tooling and data pipelines for one of Myanmar's largest ISPs.", link: "/Thein_Oke_Paing_Soe_CV.pdf", linkLabel: "Download resume" },
 ];
 
 export const PROJECTS = [
