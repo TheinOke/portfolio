@@ -103,11 +103,12 @@ export const MILESTONES = [
 ];
 
 export const PROJECTS = [
-  { short: "REST API", name: "Service REST API", body: "A production REST API with layered architecture, token auth, request validation and structured logging. Ships with OpenAPI docs and containerised deploys.", stack: "Golang · MySQL · Docker" },
-  { short: "RT Web App", name: "Real-time web app", body: "A dashboard that streams live events over websockets, with optimistic UI updates and a reconnect strategy that survives flaky mobile networks.", stack: "React · Tailwind · Golang" },
-  { short: "RT Archive", name: "Real-time archive", body: "An ingest and archival service that batches high-volume event streams into queryable cold storage without dropping messages under load.", stack: "Golang · Kafka · MySQL" },
-  { short: "CSV Util", name: "CSV utility", body: "A command-line tool for cleaning, diffing and reshaping very large CSV exports. Streams rows instead of loading files into memory.", stack: "Golang · Perl · Linux" },
-  { short: "Kafka Util", name: "Kafka utility", body: "Operator tooling for inspecting topics, replaying offsets and moving messages between clusters during migrations.", stack: "Golang · Kafka · Docker" },
+  { short: "RT Web App", name: "RT Web Application", body: "Extended the Request Tracker web application's frontend and backend in a layered architecture, contributing UI components with light React usage alongside the core Mason/Perl stack.", stack: "Perl · HTML · CSS · JavaScript · React" },
+  { short: "RT Archive", name: "RT Database Archive Tool", body: "Built a Laravel Artisan command-line tool to migrate closed and aged tickets from the live database to an archive database on a cron schedule, reducing load on the production database.", stack: "PHP · Laravel · Artisan" },
+  { short: "RT-Util", name: "RT-Util (Remote Ticket Resolver)", body: "Developed a Go CLI utility that reads ticket data from CSV files and resolves/updates tickets remotely, streamlining a previously manual support workflow.", stack: "Golang · CSV processing" },
+  { short: "Queue Xfer", name: "Queue Transfer Service", body: "Built a Go service that reads queued ticket records from CSV files and transfers/synchronizes them into the ticketing system, removing a manual data-entry step.", stack: "Golang · CSV processing" },
+  { short: "RT-Kafka", name: "RT-Kafka Integration for RT-Util", body: "Integrated Kafka messaging into rt-utils so tickets can be updated automatically from an external system in real time.", stack: "Golang · Kafka" },
+  { short: "RT API", name: "RT External API", body: "Designed and implemented external-facing REST API endpoints in Golang to expose Request Tracker data and actions to other systems.", stack: "Golang · REST" },
 ];
 
 export const DEVICON = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons";
@@ -127,8 +128,8 @@ export const TECH = [
 ];
 
 export const CONTACT = [
-  { label: "LinkedIn", value: "linkedin.com/in/theinokepaingsoe", href: "https://linkedin.com/in/theinokepaingsoe" },
-  { label: "GitHub", value: "github.com/theinokepaingsoe", href: "https://github.com/theinokepaingsoe" },
+  { label: "LinkedIn", value: "linkedin.com/in/theinokepaingsoe", href: "https://www.linkedin.com/in/thein-oke" },
+  { label: "GitHub", value: "github.com/theinokepaingsoe", href: "https://github.com/TheinOke" },
   { label: "Phone", value: "+95 9 455 554 003", href: "tel:+959455554003" },
   { label: "Address", value: "Yangon, Myanmar", href: null },
   { label: "Email", value: "theinokepaingsoe@gmail.com", href: "mailto:theinokepaingsoe@gmail.com" },
