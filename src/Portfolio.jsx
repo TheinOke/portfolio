@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from "react";
 import emailjs from "@emailjs/browser";
+import { Analytics } from "@vercel/analytics/react";
 
 import { PALETTES, SLIDES, PROJECTS, PLANE_CHASE, PLANE_LAG } from "./data";
 import { clamp, catmullRom, docPoint } from "./utils";
@@ -460,6 +461,7 @@ export default function Portfolio() {
         sendMail={sendMail} sendState={sendState} sendRef={sendRef} />
 
       <MilestoneModal C={C} openMs={openMs} setOpenMs={setOpenMs} />
+      <Analytics />
     </div>
   );
 }
